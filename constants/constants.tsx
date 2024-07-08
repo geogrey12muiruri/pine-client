@@ -4,7 +4,7 @@ export const onboardingSwiperData: onboardingSwiperDataType[] = [
     title: "Let Us Craft Your Next Outfit!",
     description: "Welcome to PineHouse, where fashion meets artistry and every stitch tells a story.",
     sortDescrition: "Experience custom-made clothing that reflects your individuality and style.",
-    image: require("@/assets/onboarding/intro_1.png"),
+    image: require("@/assets/onboarding/hero1.png"),
   },
   {
     id: 2,

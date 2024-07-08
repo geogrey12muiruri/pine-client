@@ -27,9 +27,16 @@ export default function WelcomeIntroScreen() {
         >
           <View style={{ marginTop: 80 }}>
             <Image
-              source={item.image}
-              style={{ alignSelf: "center", marginBottom: 30 }}
-            />
+                          source={item.image}
+                          style={{
+                            alignSelf: "center",
+                            marginBottom: 30,
+                            width: "100%", // Ensures the image takes the full width of its container
+                            height: 300, // Adjust this value based on your design needs
+                            resizeMode: "contain", // Ensures the image aspect ratio is maintained
+                            marginTop: 0, // Adjusts the top margin to position the image at the top
+                          }}
+                        />
             <Text style={[commonStyles.title, { fontFamily: "Raleway_700Bold" }]}>
               {item.title}
             </Text>

@@ -36,13 +36,13 @@ if (!fontsLoaded && !fontError) {
 
         <View style={styles.titleWrapper}>
             <Image
-           style={styles.titleTextShape2}
+           style={styles. titleTextShape}
             source={require("@/assets/onboarding/shape_3.png")}
             />
-            <Text style={[styles.titleTextShape2,  {fontFamily: "Raleway_700Bold"}]}>PineHouse Suits & Apparel</Text>
+            <Text style={[styles.titleText,  {fontFamily: "Raleway_700Bold"}]}>PineHouse Suits & Apparel</Text>
 
             <Image
-            style={styles.titleTextShape2}
+            style={styles. titleTextShape}
             source={require("@/assets/onboarding/shape_2.png")}
             />
 
@@ -51,16 +51,16 @@ if (!fontsLoaded && !fontError) {
 
         <View>
             <Image
-            style={styles.titleShape3}
+            style={styles. titleTextShape}
             source={require("@/assets/onboarding/shape_6.png")}
             />
 
             <Text style={[styles.titleText, {fontFamily: "Nunito_400Regular"}]}>Get The Best Fit</Text>
         </View>
 
-        <View style={styles.dscpWrapper}>
-            <Text style={[styles.dscpText, {fontFamily: "Nunito_400Regular"}]}>Explore elegance and style </Text>
-            <Text style={[styles.dscpText, {fontFamily: "Nunito_400Regular"}]}>Official, Casual and Work OutFit..</Text>
+        <View style={styles.descriptionWrapper}>
+            <Text style={[styles.descriptionText, {fontFamily: "Nunito_400Regular"}]}>Explore elegance and style </Text>
+            <Text style={[styles.descriptionText, {fontFamily: "Nunito_400Regular"}]}>Official, Casual and Work OutFit..</Text>
         </View>
         <TouchableOpacity
          style={styles.buttonWrapper}

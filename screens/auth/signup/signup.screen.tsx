@@ -34,7 +34,7 @@ import {
   import AsyncStorage from "@react-native-async-storage/async-storage";
   
   import axios from "axios";
-//   import { SERVER_URI } from "@/utils/uri";
+  import { SERVER_URI } from "@/utils/uri";
   import { Toast } from "react-native-toast-notifications";
   
   export default function SignUpScreen() {
@@ -97,8 +97,38 @@ import {
     };
   
     const handleSignIn = async () => {
-    router.push("/(routes)/verifyAccount");
-    };
+          setButtonSpinner(true);
+          await axios
+            .post(`${SERVER_URI}/api/v1/registration`, {
+              name: userInfo.name,
+              email: userInfo.email,
+              password: userInfo.password,
+            })
+            .then(async (res) => {
+              await AsyncStorage.setItem(
+                "activation_token",
+                res.data.activationToken
+              );
+              Toast.show(res.data.message, {
+                type: "success",
+              });
+              setUserInfo({
+                name: "",
+                email: "",
+                password: "",
+              });
+              setButtonSpinner(false);
+              router.push("/(routes)/verifyAccount");
+            })
+            .catch((error) => {
+              setButtonSpinner(false);
+              // Log the error to the console or display a more generic message
+              console.error(error.response ? error.response.data : error.message);
+              Toast.show("An error occurred during registration. Please try again.", {
+                type: "danger",
+              });
+            });
+        };
   
     return (
       <LinearGradient

@@ -13,7 +13,7 @@ import {
     SimpleLineIcons,
   } from "@expo/vector-icons";
   import axios from "axios";
-// import { SERVER_URI } from "@/utils/uri";
+import { SERVER_URI } from "@/utils/uri";
 import { Toast } from "react-native-toast-notifications";
 import AsyncStorage from "@react-native-async-storage/async-storage";
   import { LinearGradient } from "expo-linear-gradient";
@@ -74,24 +74,24 @@ export default function LoginScreen() {
       setUserInfo({ ...userInfo, password: value });
     }
   };
-//   const handleSignIn = async () => {
-//     await axios
-//       .post(`${SERVER_URI}/login`, {
-//         email: userInfo.email,
-//         password: userInfo.password,
-//       })
-//       .then(async (res) => {
-//         await AsyncStorage.setItem("access_token", res.data.accessToken);
-//         await AsyncStorage.setItem("refresh_token", res.data.refreshToken);
-//         router.push("/(tabs)");
-//       })
-//       .catch((error) => {
-//         console.log(error);
-//         Toast.show("Email or password is not correct!", {
-//           type: "danger",
-//         });
-//       });
-//   };
+  const handleSignIn = async () => {
+    await axios
+      .post(`${SERVER_URI}/api/v1/login`, {
+        email: userInfo.email,
+        password: userInfo.password,
+      })
+      .then(async (res) => {
+        await AsyncStorage.setItem("access_token", res.data.accessToken);
+        await AsyncStorage.setItem("refresh_token", res.data.refreshToken);
+        router.push("/(tabs)");
+      })
+      .catch((error) => {
+        console.log(error);
+        Toast.show("Email or password is not correct!", {
+          type: "danger",
+        });
+      });
+  };
 
   return (
    <LinearGradient
@@ -190,7 +190,7 @@ export default function LoginScreen() {
                 backgroundColor: "#2467EC",
                 marginTop: 15,
               }}
-            //   onPress={handleSignIn}
+              onPress={handleSignIn}
             >
               {buttonSpinner ? (
                 <ActivityIndicator size="small" color={"white"} />

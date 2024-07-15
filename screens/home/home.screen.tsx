@@ -3,7 +3,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import Header from "@/components/header/header";
 import SearchInput from "@/components/common/search.input";
 import HomeBannerSlider from "@/components/home/home.banner.slider";
-import AllCourses from "@/components/courses/all.courses";
+import Measurement from "@/components/measurement/measurement";
 
 export default function HomeScreen() {
   return (
@@ -15,7 +15,7 @@ export default function HomeScreen() {
       <SearchInput homeScreen={true} />
       <ScrollView showsVerticalScrollIndicator={false}>
         <HomeBannerSlider />
-        <AllCourses />
+        <Measurement />
       </ScrollView>
     </LinearGradient>
   );

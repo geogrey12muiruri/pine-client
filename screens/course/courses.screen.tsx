@@ -26,7 +26,7 @@ export default function CoursesScreen() {
 
   useEffect(() => {
     axios
-      .get(`${SERVER_URI}/get-layout/Categories`)
+      .get(`${SERVER_URI}/api/v1/get-layout/Categories`)
       .then((res) => {
         setcategories(res.data.layout.categories);
         fetchCourses();

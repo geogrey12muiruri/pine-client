@@ -45,7 +45,7 @@ userRouter.put(
   "/update-user",
   isAutheticated,
   authorizeRoles("admin"),
-  updateUserRole
+  updateUserRole 
 );
 
 userRouter.delete(

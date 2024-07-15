@@ -11,6 +11,7 @@ import notificationRouter from "./routes/notification.route";
 import analyticsRouter from "./routes/analytics.route";
 import layoutRouter from "./routes/layout.route";
 import { rateLimit } from "express-rate-limit";
+import blazerRouter from './routes/blazer.route'; // Import blazer routes
 
 // body parser
 app.use(express.json({ limit: "50mb" }));
@@ -46,10 +47,12 @@ app.use(
   userRouter,
   // orderRouter,
   courseRouter,
+  blazerRouter,
   notificationRouter,
   analyticsRouter,
   layoutRouter
 );
+
 
 // testing api
 app.get("/test", (req: Request, res: Response, next: NextFunction) => {

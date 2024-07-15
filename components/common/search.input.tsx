@@ -23,7 +23,7 @@ export default function SearchInput({ homeScreen }: { homeScreen?: boolean }) {
 
   useEffect(() => {
     axios
-      .get(`${SERVER_URI}/get-courses`)
+      .get(`${SERVER_URI}/api/v1/get-courses`)
       .then((res: any) => {
         setcourses(res.data.courses);
         if (!homeScreen) {

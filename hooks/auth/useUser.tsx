@@ -15,7 +15,7 @@ export default function useUser() {
       const refreshToken = await AsyncStorage.getItem("refresh_token");
 
       await axios
-        .get(`${SERVER_URI}/me`, {
+        .get(`${SERVER_URI}/api/v1/me`, {
           headers: {
             "access-token": accessToken,
             "refresh-token": refreshToken,

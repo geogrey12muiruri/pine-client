@@ -22,6 +22,8 @@ interface ICreateBlazerBody {
     length: number;
     sleeve: number;
     shoulders: number;
+    wrist: number;
+    muscle: number;
     designSpecifications: {
       description: string;
       imageUrl?: string; // Optional field
@@ -31,16 +33,29 @@ interface ICreateBlazerBody {
   export const createBlazerMeasurement = CatchAsyncError(
     async (req: Request, res: Response, next: NextFunction) => {
       try {
-        // Destructure all required fields from req.body
-        const { chest, waist, length, sleeve, shoulders, designSpecifications, userId } = req.body as ICreateBlazerBody;
+        const { userId } = req.body as ICreateBlazerBody;
   
-        // Ensure all required fields are included in the blazerModel.create method
+        // Check if a blazer measurement already exists for the user
+        const existingMeasurement = await blazerModel.findOne({ userId });
+        if (existingMeasurement) {
+          return res.status(400).json({
+            success: false,
+            message: "User already has a blazer measurement.",
+          });
+        }
+  
+        // Destructure all required fields from req.body
+        const { chest, waist, length, sleeve, shoulders, wrist, muscle, designSpecifications } = req.body;
+  
+        // Create the blazer measurement since no existing record was found
         const blazer = await blazerModel.create({
           chest,
           waist,
           length,
           sleeve,
           shoulders,
+          wrist,
+          muscle,
           designSpecifications,
           userId
         });

@@ -39,6 +39,14 @@ const blazerSchema: Schema<IBlazer> = new mongoose.Schema({
     type: Number,
     required: [true, "Length measurement is required"],
   },
+  wrist: {
+    type: Number,
+    required: [true, "Wrist measurement is required"],
+  },
+  muscle: {
+    type: Number,
+    required: [true, "Length measurement is required"],
+  },
   designSpecifications: {
     description: {
       type: String,

@@ -1,22 +1,25 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
-import { useFonts, Raleway_700Bold, Raleway_600SemiBold } from '@expo-google-fonts/raleway';
-import { LinearGradient } from 'expo-linear-gradient';
+import { View, TextInput, Button, StyleSheet, Alert, Text } from 'react-native';
+import axios from 'axios';
+import { useToast } from 'react-native-toast-notifications';
+import useUser from "@/hooks/auth/useUser";
+import { SERVER_URI } from "@/utils/uri";
 
-// Assuming TrouserModel is imported from Mongoose or defined similarly
-// const TrouserModel = ...
-
-interface Props {
-  onSubmit: () => void; // Define the onSubmit function signature as needed
+interface Measurements {
+  waist: string;
+  length: string;
+  thighs: string;
+  hips: string;
+  roundFly: string;
+  legOpening: string;
+  fly: string;
 }
 
-const TrouserMeasurement: React.FC<Props> = ({ onSubmit }) => {
-  let [fontsLoaded, fontError] = useFonts({
-    Raleway_600SemiBold,
-    Raleway_700Bold,
-  });
-
-  const [measurements, setMeasurements] = useState({
+const Trouser: React.FC = () => {
+  const { user } = useUser();
+  const toast = useToast();
+  const [formVisible, setFormVisible] = useState(true);
+  const [measurements, setMeasurements] = useState<Measurements>({
     waist: '',
     length: '',
     thighs: '',
@@ -26,126 +29,139 @@ const TrouserMeasurement: React.FC<Props> = ({ onSubmit }) => {
     fly: '',
   });
 
-  if (!fontsLoaded && !fontError) {
-    return null;
-  }
-
-  const handleInputChange = (field: string, value: string) => {
-    setMeasurements((prevMeasurements) => ({
-      ...prevMeasurements,
-      [field]: value,
+  const handleInputChange = (name: keyof Measurements, value: string) => {
+    setMeasurements((prevState) => ({
+      ...prevState,
+      [name]: value,
     }));
   };
 
-  const handleFormSubmit = () => {
-    // Validate form data here if needed
-    // Example: Ensure all required fields are filled
-    if (measurements.waist === '' || measurements.length === '' || measurements.thighs === '' ||
-        measurements.hips === '' || measurements.roundFly === '' || measurements.legOpening === '' ||
-        measurements.fly === '') {
-      // Handle validation error
-      console.error('Please fill out all required fields.');
-      return;
+  const handleFormSubmit = async () => {
+    try {
+      if (!user?._id) {
+        Alert.alert('Error', 'User ID is missing.');
+        return;
+      }
+
+      const response = await axios.post(`${SERVER_URI}/api/v1/trousers`, {
+        ...measurements,
+        userId: user._id,
+      });
+
+      toast.show('Trouser measurements submitted successfully.', {
+        type: 'success',
+        placement: 'top',
+        duration: 4000,
+        offset: 30,
+        animationType: 'slide-in',
+      });
+
+      setMeasurements({
+        waist: '',
+        inseam: '',
+        outseam: '',
+        hip: '',
+        thigh: '',
+      });
+    } catch (error) {
+      let errorMessage = 'Failed to submit trouser measurements.';
+      if (error.response && error.response.data && error.response.data.message) {
+        errorMessage = error.response.data.message;
+      }
+
+      toast.show(errorMessage, {
+        type: 'danger',
+        placement: 'top',
+        duration: 4000,
+        offset: 30,
+        animationType: 'slide-in',
+      });
+      console.error('Error submitting trouser measurements:', error);
     }
-
-    // Handle form submission logic (e.g., save to database using TrouserModel)
-    // Example: Save measurements to database
-    console.log('Measurements submitted:', measurements);
-    // Reset form after submission
-    setMeasurements({
-      waist: '',
-      length: '',
-      thighs: '',
-      hips: '',
-      roundFly: '',
-      legOpening: '',
-      fly: '',
-    });
-
-    // Call onSubmit function passed from parent component
-    onSubmit();
   };
 
   return (
-    <LinearGradient colors={['#E5ECF9', '#F6F7F9']} style={styles.container}>
-      <View style={styles.formContainer}>
-        <Text style={[styles.formTitle, { fontFamily: 'Raleway_700Bold' }]}>Trouser Measurement Form</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Waist (cm)"
-          value={measurements.waist}
-          onChangeText={(text) => handleInputChange('waist', text)}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Length (cm)"
-          value={measurements.length}
-          onChangeText={(text) => handleInputChange('length', text)}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Thighs (cm)"
-          value={measurements.thighs}
-          onChangeText={(text) => handleInputChange('thighs', text)}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Hips (cm)"
-          value={measurements.hips}
-          onChangeText={(text) => handleInputChange('hips', text)}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Round Fly (cm)"
-          value={measurements.roundFly}
-          onChangeText={(text) => handleInputChange('roundFly', text)}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Leg Opening (cm)"
-          value={measurements.legOpening}
-          onChangeText={(text) => handleInputChange('legOpening', text)}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Fly Type"
-          value={measurements.fly}
-          onChangeText={(text) => handleInputChange('fly', text)}
-        />
-        <Button title="Submit Measurements" onPress={handleFormSubmit} />
-      </View>
-    </LinearGradient>
+    <View style={styles.container}>
+      {formVisible ? (
+        <>
+          <TextInput
+            placeholder="Waist"
+            onChangeText={(text) => handleInputChange('waist', text)}
+            value={measurements.waist}
+            style={styles.input}
+            keyboardType="numeric"
+          />
+          <TextInput
+            placeholder="Length"
+            onChangeText={(text) => handleInputChange('length', text)}
+            value={measurements.length}
+            style={styles.input}
+            keyboardType="numeric"
+          />
+          <TextInput
+            placeholder="Thighs"
+            onChangeText={(text) => handleInputChange('thighs', text)}
+            value={measurements.thighs}
+            style={styles.input}
+            keyboardType="numeric"
+          />
+          <TextInput
+            placeholder="Hips"
+            onChangeText={(text) => handleInputChange('hips', text)}
+            value={measurements.hips}
+            style={styles.input}
+            keyboardType="numeric"
+          />
+          <TextInput
+            placeholder="RoundFly"
+            onChangeText={(text) => handleInputChange('roundFly', text)}
+            value={measurements.roundFly}
+            style={styles.input}
+            keyboardType="numeric"
+          />
+          <TextInput
+            placeholder="LegOpening"
+            onChangeText={(text) => handleInputChange('legOpening', text)}
+            value={measurements.legOpening}
+            style={styles.input}
+            keyboardType="numeric"
+          />
+          <TextInput
+            placeholder="Fly"
+            onChangeText={(text) => handleInputChange('fly', text)}
+            value={measurements.fly}
+            style={styles.input}
+          />
+          <Button title="Submit Measurements" onPress={handleFormSubmit} />
+        </>
+      ) : (
+        <Text style={styles.successMessage}>Trouser measurements submitted successfully. Please select another category.</Text>
+      )}
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
-  },
-  formContainer: {
-    width: '100%',
-    maxWidth: 400,
-    padding: 20,
+    justifyContent: 'center',
+    padding: 16,
     backgroundColor: '#fff',
-    borderRadius: 10,
-    elevation: 2,
-  },
-  formTitle: {
-    fontSize: 18,
-    marginBottom: 20,
-    textAlign: 'center',
   },
   input: {
-    height: 40,
-    borderColor: '#2467EC',
+    width: '80%',
+    padding: 10,
+    marginVertical: 8,
     borderWidth: 1,
-    borderRadius: 10,
-    marginBottom: 15,
-    paddingHorizontal: 10,
+    borderColor: '#ddd',
+    borderRadius: 4,
+  },
+  successMessage: {
+    fontSize: 18,
+    textAlign: 'center',
+    color: 'green',
   },
 });
 
-export default TrouserMeasurement;
+export default Trouser;

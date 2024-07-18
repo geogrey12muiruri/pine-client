@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Image, Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
+import { useToast } from 'react-native-toast-notifications';
 import useUser from "@/hooks/auth/useUser";
 import { SERVER_URI } from "@/utils/uri";
 
@@ -11,22 +12,26 @@ interface BlazerMeasurements {
   waist: string;
   shoulders: string;
   length: string;
+  wrist: string;
+  muscle: string;
   designSpecifications: {
     description: string;
-    imageUrl?: string; // Optional field
+    imageUrl?: string;
   };
 }
 
 const BlazerMeasurement: React.FC = () => {
-  const { user } = useUser(); // Assuming useUser hook returns user object with `id` field
-  console.log(user);
-  
+  const { user } = useUser();
+  const toast = useToast();
+
   const [measurements, setMeasurements] = useState<BlazerMeasurements>({
     chest: '',
     sleeve: '',
     waist: '',
     shoulders: '',
     length: '',
+    wrist: '',
+    muscle: '',
     designSpecifications: {
       description: '',
       imageUrl: '',
@@ -59,7 +64,7 @@ const BlazerMeasurement: React.FC = () => {
     });
 
     if (!result.cancelled) {
-      handleDesignSpecChange('imageUrl', result.uri); // Use `result.uri` directly for imageUrl
+      handleDesignSpecChange('imageUrl', result.uri);
     }
   };
 
@@ -69,30 +74,46 @@ const BlazerMeasurement: React.FC = () => {
         Alert.alert('Error', 'User ID is missing.');
         return;
       }
-
-      const response = await axios.post(`${SERVER_URI}/api/v1/blazers`, {
+  
+      const res = await axios.post(`${SERVER_URI}/api/v1/blazers`, {
         ...measurements,
-        userId: user._id, // Use user.id obtained from useUser hook
+        userId: user._id,
       });
-
-      // Handle success response
-      Alert.alert('Success', 'Blazer measurements submitted successfully.');
-      
-      // Reset form after successful submission (if needed)
+  
+      toast.show('Blazer measurements submitted successfully.', {
+        type: 'success',
+        placement: 'top',
+        duration: 4000,
+        offset: 30,
+        animationType: 'slide-in',
+      });
+  
       setMeasurements({
         chest: '',
         sleeve: '',
         waist: '',
         shoulders: '',
         length: '',
+        wrist: '',
+        muscle: '',
         designSpecifications: {
           description: '',
           imageUrl: '',
         },
       });
     } catch (error) {
-      // Handle error
-      Alert.alert('Error', 'Failed to submit blazer measurements.');
+      let errorMessage = 'Failed to submit blazer measurements.';
+      if ((error as any).response && (error as any).response.data && (error as any).response.data.message) {
+        errorMessage = (error as any).response.data.message;
+      }
+  
+      toast.show(errorMessage, {
+        type: 'danger',
+        placement: 'top',
+        duration: 4000,
+        offset: 30,
+        animationType: 'slide-in',
+      });
       console.error('Error submitting blazer measurements:', error);
     }
   };
@@ -133,6 +154,20 @@ const BlazerMeasurement: React.FC = () => {
         placeholder="Length"
         value={measurements.length}
         onChangeText={(text) => handleInputChange('length', text)}
+        keyboardType="numeric"
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Wrist"
+        value={measurements.wrist}
+        onChangeText={(text) => handleInputChange('wrist', text)}
+        keyboardType="numeric"
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Muscle"
+        value={measurements.muscle}
+        onChangeText={(text) => handleInputChange('muscle', text)}
         keyboardType="numeric"
       />
       <TextInput

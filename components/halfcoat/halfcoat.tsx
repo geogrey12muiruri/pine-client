@@ -1,108 +1,145 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, Button } from 'react-native';
-import { useFonts, Raleway_600SemiBold } from '@expo-google-fonts/raleway';
-import { LinearGradient } from 'expo-linear-gradient';
+import { View, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import axios from 'axios';
+import { useToast } from 'react-native-toast-notifications';
+import useUser from "@/hooks/auth/useUser";
+import { SERVER_URI } from "@/utils/uri";
 
-export default function HalfCoatMeasurement({ onSubmit }) {
-  let [fontsLoaded] = useFonts({
-    Raleway_600SemiBold,
-  });
+interface HalfCoatMeasurements {
+  length: string;
+  shoulder: string;
+  waist: string;
+  designDescription: string;
+  designImageUrl?: string;
+}
 
-  const [measurements, setMeasurements] = useState({
+const HalfCoat: React.FC = () => {
+  const { user } = useUser();
+  const toast = useToast();
+  const [measurements, setMeasurements] = useState<HalfCoatMeasurements>({
     length: '',
     shoulder: '',
     waist: '',
-    description: '',
+    designDescription: '',
+    designImageUrl: '',
   });
 
-  const handleInputChange = (field, value) => {
-    setMeasurements((prevMeasurements) => ({
-      ...prevMeasurements,
-      [field]: value,
+  const handleInputChange = (name: keyof HalfCoatMeasurements, value: string) => {
+    setMeasurements((prevState) => ({
+      ...prevState,
+      [name]: value,
     }));
   };
 
-  const handleSubmit = () => {
-    // Validate measurements here if needed
-    onSubmit(measurements);
-    setMeasurements({
-      length: '',
-      shoulder: '',
-      waist: '',
-      description: '',
-    });
+  const handleFormSubmit = async () => {
+    try {
+      if (!user?._id) {
+        Alert.alert('Error', 'User ID is missing.');
+        return;
+      }
+
+      if (!measurements.designDescription) {
+        Alert.alert('Error', 'Design specifications description is required.');
+        return;
+      }
+
+      const response = await axios.post(`${SERVER_URI}/api/v1/halfcoats`, {
+        userId: user._id,
+        length: parseFloat(measurements.length),
+        shoulder: parseFloat(measurements.shoulder),
+        waist: parseFloat(measurements.waist),
+        designDescription: measurements.designDescription,
+        designImageUrl: measurements.designImageUrl, // Optional
+      });
+
+      toast.show('Half coat measurements submitted successfully.', {
+        type: 'success',
+        placement: 'top',
+        duration: 4000,
+        offset: 30,
+        animationType: 'slide-in',
+      });
+
+      setMeasurements({
+        length: '',
+        shoulder: '',
+        waist: '',
+        designDescription: '',
+        designImageUrl: '',
+      });
+    } catch (error) {
+      let errorMessage = 'Failed to submit half coat measurements.';
+      if ((error as any).response && (error as any).response.data && (error as any).response.data.message) {
+        errorMessage = (error as any).response.data.message;
+      }
+
+      toast.show(errorMessage, {
+        type: 'danger',
+        placement: 'top',
+        duration: 4000,
+        offset: 30,
+        animationType: 'slide-in',
+      });
+      console.error('Error submitting half coat measurements:', error);
+    }
   };
 
-  if (!fontsLoaded) {
-    return null;
-  }
-
   return (
-    <LinearGradient colors={['#E5ECF9', '#F6F7F9']} style={styles.container}>
-      <Text style={[styles.title, { fontFamily: 'Raleway_600SemiBold' }]}>
-        Half Coat Measurements
-      </Text>
-      <View style={styles.form}>
-        <TextInput
-          style={styles.input}
-          placeholder="Length (cm)"
-          keyboardType="numeric"
-          value={measurements.length}
-          onChangeText={(text) => handleInputChange('length', text)}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Shoulder (cm)"
-          keyboardType="numeric"
-          value={measurements.shoulder}
-          onChangeText={(text) => handleInputChange('shoulder', text)}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Waist (cm)"
-          keyboardType="numeric"
-          value={measurements.waist}
-          onChangeText={(text) => handleInputChange('waist', text)}
-        />
-        <TextInput
-          style={[styles.input, { height: 100 }]}
-          placeholder="Description"
-          multiline
-          value={measurements.description}
-          onChangeText={(text) => handleInputChange('description', text)}
-        />
-        <Button
-          title="Submit"
-          onPress={handleSubmit}
-          disabled={!measurements.length || !measurements.shoulder || !measurements.waist || !measurements.description}
-        />
-      </View>
-    </LinearGradient>
+    <View style={styles.container}>
+      <TextInput
+        placeholder="Length"
+        onChangeText={(text) => handleInputChange('length', text)}
+        value={measurements.length}
+        style={styles.input}
+        keyboardType="numeric"
+      />
+      <TextInput
+        placeholder="Shoulder"
+        onChangeText={(text) => handleInputChange('shoulder', text)}
+        value={measurements.shoulder}
+        style={styles.input}
+        keyboardType="numeric"
+      />
+      <TextInput
+        placeholder="Waist"
+        onChangeText={(text) => handleInputChange('waist', text)}
+        value={measurements.waist}
+        style={styles.input}
+        keyboardType="numeric"
+      />
+      <TextInput
+        placeholder="Design Description"
+        onChangeText={(text) => handleInputChange('designDescription', text)}
+        value={measurements.designDescription}
+        style={styles.input}
+      />
+      <TextInput
+        placeholder="Design Image URL (Optional)"
+        onChangeText={(text) => handleInputChange('designImageUrl', text)}
+        value={measurements.designImageUrl}
+        style={styles.input}
+      />
+      <Button title="Submit Measurements" onPress={handleFormSubmit} />
+    </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-  },
-  title: {
-    fontSize: 20,
-    textAlign: 'center',
-    marginVertical: 20,
-  },
-  form: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 10,
-    padding: 20,
-    elevation: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
+    backgroundColor: '#fff',
   },
   input: {
-    height: 40,
-    borderColor: '#CCCCCC',
+    width: '80%',
+    padding: 10,
+    marginVertical: 8,
     borderWidth: 1,
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    marginBottom: 10,
+    borderColor: '#ddd',
+    borderRadius: 4,
   },
 });
+
+export default HalfCoat;

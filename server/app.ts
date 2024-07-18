@@ -12,6 +12,11 @@ import analyticsRouter from "./routes/analytics.route";
 import layoutRouter from "./routes/layout.route";
 import { rateLimit } from "express-rate-limit";
 import blazerRouter from './routes/blazer.route'; // Import blazer routes
+import trouserRouter from './routes/trouser.route'; // Import trouser routes  
+import shirtRouter from "./routes/shirt.route";
+import halfCoatRouter from "./routes/halfcoat.route";
+import skirtRouter from "./routes/skirt.route";
+import dressRouter from "./routes/dress.route";
 
 // body parser
 app.use(express.json({ limit: "50mb" }));
@@ -50,7 +55,12 @@ app.use(
   blazerRouter,
   notificationRouter,
   analyticsRouter,
-  layoutRouter
+  layoutRouter,
+  trouserRouter,
+  shirtRouter,
+  halfCoatRouter,
+  skirtRouter,
+  dressRouter
 );
 
 
